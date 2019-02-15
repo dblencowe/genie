@@ -1,0 +1,4 @@
+---
+commands:
+  hello:
+    - "echo 'Hello world, how're we today!"
