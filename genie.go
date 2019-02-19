@@ -7,8 +7,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
+	"github.com/imdario/mergo"
 )
 
 type command struct {
@@ -20,15 +22,41 @@ type configFile struct {
 	Commands map[string][]command `yaml:"commands"`
 }
 
-func (c *configFile) getConf() *configFile {
+func findCommandFiles() []string {
+	var discoveredFiles []string
+	path, err := os.Getwd()
+	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if filepath.Base(path) == "commands.yaml" {
+			discoveredFiles = append(discoveredFiles, path)
+		}
 
-	yamlFile, err := ioutil.ReadFile("commands.yaml")
+		return nil
+	})
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		log.Println(err)
 	}
-	err = yaml.Unmarshal(yamlFile, c)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+
+	return discoveredFiles
+}
+
+func (c *configFile) getConf() *configFile {
+	files := findCommandFiles()
+	fmt.Println(files)
+	for k := range files {
+		yamlFile, err := ioutil.ReadFile(files[k])
+		if err != nil {
+			log.Printf("yamlFile.Get err   #%v ", err)
+		}
+		tempStruct := configFile{}
+		err = yaml.Unmarshal(yamlFile, &tempStruct)
+		if err != nil {
+			log.Fatalf("Unmarshal: %v", err)
+		}
+
+		mergo.Merge(c, tempStruct)
 	}
 
 	return c
@@ -48,6 +76,7 @@ func main() {
 
 	var c configFile
 	c.getConf()
+	fmt.Println(c.Commands)
 	args := os.Args[1:]
 	if 0 == len(args) {
 		c.getAvailableCommands()
@@ -55,8 +84,6 @@ func main() {
 	}
 
 	commandName := flag.Args()[0]
-	// fmt.Printf("%+v\n", c.Commands)
-	// fmt.Printf("%+v\n", c.Commands[commandName][0])
 	for key := range c.Commands[commandName] {
 		if dryRun == true {
 			fmt.Printf(">\t%s %s\n", c.Commands[commandName][key].Executable, c.Commands[commandName][key].Arguments)
@@ -66,7 +93,7 @@ func main() {
 			cmd := exec.Command(executable, arguments)
 			out, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("cmd.Run() failed with %s\n", err)
+				log.Fatalf("Command failed with %s\n", err)
 			}
 			fmt.Printf("%s", string(out))
 		}
