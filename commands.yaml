@@ -1,4 +1,10 @@
 ---
 commands:
   hello:
-    - "echo 'Hello world, how're we today!"
+    - executable: echo
+      arguments: "Hello world, how're we today!"
+    - executable: echo
+      arguments: done
+  something:
+    - executable: echo
+      arguements: "Second command"

@@ -6,16 +6,21 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	// "os/exec"
+	"os/exec"
 
 	"gopkg.in/yaml.v2"
 )
 
-type conf struct {
-	Commands map[string][]string `yaml:"commands"`
+type command struct {
+	Executable string `yaml:"executable"`
+	Arguments string `yaml:"arguments"`
 }
 
-func (c *conf) getConf() *conf {
+type configFile struct {
+	Commands map[string][]command `yaml:"commands"`
+}
+
+func (c *configFile) getConf() *configFile {
 
 	yamlFile, err := ioutil.ReadFile("commands.yaml")
 	if err != nil {
@@ -29,7 +34,7 @@ func (c *conf) getConf() *conf {
 	return c
 }
 
-func (c *conf) getAvailableCommands() {
+func (c *configFile) getAvailableCommands() {
 	fmt.Println("Available commands:")
 	for k := range c.Commands {
 		fmt.Println("\t" + k)
@@ -41,7 +46,7 @@ func main() {
 	flag.BoolVar(&dryRun, "dry", false, "Run in dry mode to print commands")
 	flag.Parse()
 
-	var c conf
+	var c configFile
 	c.getConf()
 	args := os.Args[1:]
 	if 0 == len(args) {
@@ -49,20 +54,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Println(c)
-	fmt.Println(c.Commands[args[0]])
-	fmt.Println(dryRun)
-	fmt.Println(flag.Args())
-	// for key := range c.Commands[args[0]] {
-	// 	if *dryMode == true {
-	// 		fmt.Println(c.Commands[args[0]][key])
-	// 	} else {
-	// 		cmd := exec.Command(c.Commands[args[0]][key])
-	// 		out, err := cmd.CombinedOutput()
-	// 		if err != nil {
-	// 			log.Fatalf("cmd.Run() failed with %s\n", err)
-	// 		}
-	// 		fmt.Printf("combined out:\n%s\n", string(out))
-	// 	}
-	// }
+	commandName := flag.Args()[0]
+	// fmt.Printf("%+v\n", c.Commands)
+	// fmt.Printf("%+v\n", c.Commands[commandName][0])
+	for key := range c.Commands[commandName] {
+		if dryRun == true {
+			fmt.Printf(">\t%s %s\n", c.Commands[commandName][key].Executable, c.Commands[commandName][key].Arguments)
+		} else {
+			executable := c.Commands[commandName][key].Executable
+			arguments := c.Commands[commandName][key].Arguments
+			cmd := exec.Command(executable, arguments)
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("cmd.Run() failed with %s\n", err)
+			}
+			fmt.Printf("%s", string(out))
+		}
+	}
 }
