@@ -9,13 +9,13 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"gopkg.in/yaml.v2"
 	"github.com/imdario/mergo"
+	"gopkg.in/yaml.v2"
 )
 
 type command struct {
 	Executable string `yaml:"executable"`
-	Arguments string `yaml:"arguments"`
+	Arguments  string `yaml:"arguments"`
 }
 
 type configFile struct {
@@ -44,7 +44,6 @@ func findCommandFiles() []string {
 
 func (c *configFile) getConf() *configFile {
 	files := findCommandFiles()
-	fmt.Println(files)
 	for k := range files {
 		yamlFile, err := ioutil.ReadFile(files[k])
 		if err != nil {
@@ -76,7 +75,6 @@ func main() {
 
 	var c configFile
 	c.getConf()
-	fmt.Println(c.Commands)
 	args := os.Args[1:]
 	if 0 == len(args) {
 		c.getAvailableCommands()
