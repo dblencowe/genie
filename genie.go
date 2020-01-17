@@ -13,13 +13,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type environment struct {
+	Name  string `yaml:"name"`
+	Value string `yaml:"value"`
+}
+
 type command struct {
-	Executable string `yaml:"executable"`
-	Arguments  string `yaml:"arguments"`
+	Command     string        `yaml:"command"`
+	Environment []environment `yaml:"environment"`
 }
 
 type configFile struct {
 	Commands map[string][]command `yaml:"commands"`
+	Shell    string               `yaml:"shell"`
 }
 
 func findCommandFiles() []string {
@@ -84,16 +90,27 @@ func main() {
 	commandName := flag.Args()[0]
 	for key := range c.Commands[commandName] {
 		if dryRun == true {
-			fmt.Printf(">\t%s %s\n", c.Commands[commandName][key].Executable, c.Commands[commandName][key].Arguments)
+			fmt.Printf(">\t%s\n", c.Commands[commandName][key].Command)
 		} else {
-			executable := c.Commands[commandName][key].Executable
-			arguments := c.Commands[commandName][key].Arguments
-			cmd := exec.Command(executable, arguments)
+			command := c.Commands[commandName][key].Command
+			env := c.Commands[commandName][key].Environment
+			cmd := exec.Command("bash", "-c", command)
+			cmd.Env = append(os.Environ(), envBuilder(env)...)
 			out, err := cmd.CombinedOutput()
 			if err != nil {
+				fmt.Printf("%s", string(out))
 				log.Fatalf("Command failed with %s\n", err)
 			}
 			fmt.Printf("%s", string(out))
 		}
 	}
+}
+
+func envBuilder(env []environment) []string {
+	var result []string
+	for _, row := range env {
+		result = append(result, fmt.Sprintf("%s=%s\n", row.Name, row.Value))
+	}
+
+	return result
 }

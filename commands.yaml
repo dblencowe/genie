@@ -1,10 +1,15 @@
 ---
+shell: /bin/zsh
 commands:
   hello:
-    - executable: echo
-      arguments: "Hello world, how're we today!"
-    - executable: echo
-      arguments: done
+    - command: echo "Hello world, how're we today!"
+    - command: echo done
   something:
-    - executable: echo
-      arguements: "Second command"
+    - command: echo
+  test-environment:
+    - command: echo It is $ENV before $ENV2
+      environment: 
+        - name: ENV
+          value: ITWORKS
+        - name: ENV2
+          value: ITWORKS2dqdwd
