@@ -58,8 +58,13 @@ func initCommandsFile() string {
 		panic("commands.yaml file already exists at " + path)
 	}
 
+	commandMap := make(map[string][]command)
+	commandMap["example"] = []command{
+		command{Command: "echo this is an example command"},
+	}
 	t := configFile{
-		Shell: "/bin/bash",
+		Shell:    "/bin/bash",
+		Commands: commandMap,
 	}
 	content, _ := yaml.Marshal(&t)
 	err = ioutil.WriteFile(targetFile, []byte(content), 0644)
