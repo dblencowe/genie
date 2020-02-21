@@ -9,8 +9,7 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: test build
 build:
-	$(GOCMD) get github.com/imdario/mergo
-	$(GOCMD) get gopkg.in/yaml.v2
+	$(GOCMD) get ./...
 	$(GOBUILD) -o $(BINARY_NAME) -v
 test:
 	$(GOTEST) -v ./...

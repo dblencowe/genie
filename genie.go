@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/imdario/mergo"
+	"github.com/mitchellh/go-homedir"
 	"gopkg.in/yaml.v2"
 )
 
@@ -30,6 +31,9 @@ type configFile struct {
 
 func findCommandFiles() []string {
 	var discoveredFiles []string
+	homeDirectory, _ := homedir.Dir()
+	discoveredFiles = append(discoveredFiles, homeDirectory+"/.genie-commands.yaml")
+
 	path, err := os.Getwd()
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
