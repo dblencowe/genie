@@ -48,6 +48,33 @@ func findCommandFiles() []string {
 	return discoveredFiles
 }
 
+func initCommandsFile() string {
+	path, _ := os.Getwd()
+	targetFile := path + "/commands.yaml"
+
+	_, err := os.Stat(targetFile)
+	if err == nil {
+		log.Fatalf("commands.yaml file already exists at " + path)
+		panic("commands.yaml file already exists at " + path)
+	}
+
+	commandMap := make(map[string][]command)
+	commandMap["example"] = []command{
+		command{Command: "echo this is an example command"},
+	}
+	t := configFile{
+		Shell:    "/bin/bash",
+		Commands: commandMap,
+	}
+	content, _ := yaml.Marshal(&t)
+	err = ioutil.WriteFile(targetFile, []byte(content), 0644)
+	if err != nil {
+		log.Fatalf("Unable to create file " + path)
+	}
+
+	return path
+}
+
 func (c *configFile) getConf() *configFile {
 	files := findCommandFiles()
 	for k := range files {
@@ -69,6 +96,7 @@ func (c *configFile) getConf() *configFile {
 
 func (c *configFile) getAvailableCommands() {
 	fmt.Println("Available commands:")
+	fmt.Println("\tinit - create a commands.yaml file in the current directory\n")
 	for k := range c.Commands {
 		fmt.Println("\t" + k)
 	}
@@ -88,6 +116,12 @@ func main() {
 	}
 
 	commandName := flag.Args()[0]
+
+	if commandName == "init" {
+		path := initCommandsFile()
+		fmt.Printf("Created commands file at " + path)
+	}
+
 	for key := range c.Commands[commandName] {
 		if dryRun == true {
 			fmt.Printf(">\t%s\n", c.Commands[commandName][key].Command)
