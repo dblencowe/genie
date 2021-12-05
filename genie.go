@@ -39,7 +39,7 @@ func findCommandFiles() []string {
 		if err != nil {
 			return err
 		}
-		if filepath.Base(path) == "commands.yaml" {
+		if filepath.Base(path) == "genie.yaml" {
 			discoveredFiles = append(discoveredFiles, path)
 		}
 
@@ -54,12 +54,11 @@ func findCommandFiles() []string {
 
 func initCommandsFile() string {
 	path, _ := os.Getwd()
-	targetFile := path + "/commands.yaml"
+	targetFile := path + "/genie.yaml"
 
 	_, err := os.Stat(targetFile)
 	if err == nil {
-		log.Fatalf("commands.yaml file already exists at " + path)
-		panic("commands.yaml file already exists at " + path)
+		log.Fatalf("genie.yaml file already exists at " + path)
 	}
 
 	commandMap := make(map[string][]command)

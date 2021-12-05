@@ -20,7 +20,7 @@ mv genie /usr/local/bin
 
 Genie looks for command.yaml files in your current directory and its
 children
-### Create commands.yaml file
+### Create genie.yaml file
 ```shell
 genie init
 ```
@@ -35,7 +35,7 @@ genie
 genie {command name}
 ```
 
-### Global commands.yaml file
+### Global genie-commands.yaml file
 Genie will load global commands from a `.genie-commands.yaml` file
 in your home directory
 ```yaml
@@ -47,7 +47,7 @@ commands:
     - command: echo done
 ```
 
-## Example commands.yaml
+## Example genie.yaml
 ```yaml
 ---
 shell: /bin/zsh
