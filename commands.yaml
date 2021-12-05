@@ -8,8 +8,8 @@ commands:
     - command: echo
   test-environment:
     - command: echo It is $ENV before $ENV2
-      environment: 
+      environment:
         - name: ENV
           value: ITWORKS
         - name: ENV2
-          value: ITWORKS2dqdwd
+          value: ITWORKS2
